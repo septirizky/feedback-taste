@@ -1,6 +1,54 @@
 import { NextRequest } from "next/server";
 import { gristCreate, gristRecords } from "@/lib/grist";
 
+function stripIp(ip: string) {
+  return ip.replace(/^\[?(.+?)\]?(:\d+)?$/, "$1");
+}
+
+function getClientIp(req: NextRequest): string {
+  const h = req.headers;
+
+  const candidates = [
+    "cf-connecting-ip",
+    "x-client-ip",
+    "x-real-ip",
+    "x-forwarded-for",
+    "x-forwarded",
+    "forwarded",
+    "fastly-client-ip",
+    "fly-client-ip",
+  ];
+
+  for (const k of candidates) {
+    const v = h.get(k);
+    if (!v) continue;
+
+    if (k === "x-forwarded-for") {
+      return stripIp(v.split(",")[0].trim());
+    }
+    if (k === "forwarded") {
+      const m = /for="?([^;"]+)/i.exec(v);
+      if (m?.[1]) return stripIp(m[1]);
+      continue;
+    }
+    return stripIp(v);
+  }
+
+  return "127.0.0.1";
+}
+
+type DeviceSource = "mobile" | "tablet" | "desktop";
+
+function detectDeviceSource(uaRaw: string | null): DeviceSource {
+  const ua = (uaRaw ?? "").toLowerCase();
+
+  if (/ipad|tablet|playbook|kindle/.test(ua)) return "tablet";
+  if (/android/.test(ua) && !/mobile/.test(ua)) return "tablet";
+
+  if (/mobi|iphone|ipod|phone|android.*mobile/.test(ua)) return "mobile";
+  return "desktop";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -16,10 +64,14 @@ export async function POST(req: NextRequest) {
       sauces: process.env.GRIST_TBL_SAUCES!,
     };
 
+    const ipAddr = getClientIp(req);
+    const ua = req.headers.get("user-agent");
+    const device = detectDeviceSource(ua);
+
     const [branches, stations, sauces] = await Promise.all([
-      gristRecords(tbl.branches),
-      gristRecords(tbl.stations),
-      gristRecords(tbl.sauces),
+      gristRecords<{ BranchCode: string }>(tbl.branches),
+      gristRecords<{ StationCode: string }>(tbl.stations),
+      gristRecords<{ SauceName: string; Name?: string }>(tbl.sauces),
     ]);
 
     const branch = branches.find(
@@ -39,12 +91,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ---- Normalisasi nilai dari client (bisa dapat 1/0/"1"/"0"/"Like"/"Dislike") ----
     const rawLike = body.likeValue ?? body.lv ?? null;
     const rawStar = body.starValue ?? body.sv ?? null;
 
-    // to "Like" | "Dislike" | null
-    let likeText: string | null = null;
+    let likeText: "Like" | "Dislike" | null = null;
     if (rawLike !== null && rawLike !== "") {
       const yes =
         rawLike === true ||
@@ -54,25 +104,13 @@ export async function POST(req: NextRequest) {
       likeText = yes ? "Like" : "Dislike";
     }
 
-    // to number 1..5 | null
     const starParsed = parseInt(rawStar, 10);
     const starValue =
       rawStar === null || rawStar === "" || Number.isNaN(starParsed)
         ? null
         : Math.max(1, Math.min(5, starParsed));
 
-    // (opsional) log cepat biar gampang debug
-    console.log("FEEDBACK payload ->", {
-      branchCode,
-      stationCode,
-      sauceName,
-      rawLike,
-      rawStar,
-      likeText,
-      starValue,
-    });
-
-    const fields: any = {
+    const fields = {
       Branch: branch.id,
       Station: station.id,
       Sauce: sauce.id,
@@ -80,20 +118,18 @@ export async function POST(req: NextRequest) {
       StarValue: starValue,
       Comment: body.comment || "",
       SubmittedAt: new Date().toISOString(),
-      Source: body.source || "tablet",
-      IpAddr: body.ip || "",
+      Source: device,
+      IpAddr: ipAddr,
     };
 
     const created = await gristCreate(tbl.feedbacks, fields);
-    return Response.json({ ok: true, id: created?.id });
-  } catch (e: any) {
-    console.error("POST /api/feedback error:", e);
-    return new Response(
-      JSON.stringify({ error: e?.message || "Internal error" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return Response.json({ ok: true, id: created.id });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("POST /api/feedback error:", msg);
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

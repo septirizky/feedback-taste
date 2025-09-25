@@ -1,28 +1,23 @@
-import { NextRequest } from "next/server";
 import { gristRecords } from "@/lib/grist";
+import type { BranchFields, StationFields } from "@/types/grist";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     const branchCode = (
-      req.nextUrl.searchParams.get("branchCode") || ""
+      new URL(req.url).searchParams.get("branchCode") || ""
     ).toUpperCase();
-    const tblStations = process.env.GRIST_TBL_STATIONS!;
-    const tblBranches = process.env.GRIST_TBL_BRANCHES!;
-
     const [stations, branches] = await Promise.all([
-      gristRecords(tblStations),
-      gristRecords(tblBranches),
+      gristRecords<StationFields>(process.env.GRIST_TBL_STATIONS!),
+      gristRecords<BranchFields>(process.env.GRIST_TBL_BRANCHES!),
     ]);
 
     const branch = branches.find(
-      (b) => String(b.fields.BranchCode || "").toUpperCase() === branchCode
+      (b) => (b.fields.BranchCode || "").toUpperCase() === branchCode
     );
     if (!branch) return Response.json({ items: [] });
 
     const items = stations
-      .filter(
-        (s) => String(s.fields.StationStatus || "").toLowerCase() === "active"
-      )
+      .filter((s) => (s.fields.StationStatus || "").toLowerCase() === "active")
       .filter((s) => s.fields.BranchCode === branch.id)
       .map((s) => ({
         stationCode: s.fields.StationCode,
@@ -31,11 +26,8 @@ export async function GET(req: NextRequest) {
       }));
 
     return Response.json({ items });
-  } catch (e: any) {
-    console.error("GET /api/grist/stations error:", e);
-    return new Response(
-      JSON.stringify({ error: e.message || "Internal error" }),
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return new Response(JSON.stringify({ error: msg }), { status: 500 });
   }
 }
