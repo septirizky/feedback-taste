@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ====== Dekor sudut: shake + bob (global) ====== */
+@keyframes deco-float-shake {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate3d(3px, -10px, 0) rotate(4deg);
+  }
+  40% {
+    transform: translate3d(-4px, -14px, 0) rotate(-5deg);
+  }
+  60% {
+    transform: translate3d(4px, -10px, 0) rotate(4deg);
+  }
+  80% {
+    transform: translate3d(-3px, -4px, 0) rotate(-4deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.deco-shake {
+  will-change: transform;
+  transform-origin: center 60%;
+  animation: deco-float-shake var(--deco-speed, 1.8s) ease-in-out infinite;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.18));
+}
+
+/* Variasi kecepatan */
+.deco-slow {
+  --deco-speed: 2.6s;
+}
+.deco-fast {
+  --deco-speed: 1.4s;
+}
+
+/* Sedikit asinkron biar nggak kompak geraknya */
+.deco-delay-150 {
+  animation-delay: 0.15s;
+}
+.deco-delay-300 {
+  animation-delay: 0.3s;
+}
+.deco-delay-450 {
+  animation-delay: 0.45s;
+}
+.deco-delay-600 {
+  animation-delay: 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deco-shake {
+    animation: none !important;
+  }
 }
