@@ -148,6 +148,7 @@ export default function MapSaucesPage() {
   return (
     <DeviceShell>
       <div className="relative h-full overflow-hidden bg-gradient-to-b from-slate-50 via-white to-orange-50">
+        {/* dekor */}
         <img
           src="/kerang.png"
           alt=""
@@ -201,13 +202,23 @@ export default function MapSaucesPage() {
                       onClick={() => toggle(s.rowId)}
                       aria-pressed={active}
                       disabled={disabled}
-                      className={`w-full text-left rounded-3xl bg-white/95 ring-1 ${
+                      className={`relative w-full text-left rounded-3xl bg-white/95 ring-1 ${
                         active ? "ring-emerald-400" : "ring-black/5"
                       } shadow-[0_8px_24px_rgba(0,0,0,.08)] p-5 transition
                       hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,.10)]
                       ${disabled ? "opacity-50 pointer-events-none" : ""}
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400`}
                     >
+                      {/* badge ceklis di pojok kanan atas */}
+                      {active && (
+                        <span
+                          aria-hidden
+                          className="absolute right-3 top-3 grid place-content-center size-6 rounded-full bg-emerald-500 text-white text-sm shadow"
+                        >
+                          ✓
+                        </span>
+                      )}
+
                       <div className="flex items-center gap-4">
                         <div className="relative size-16 sm:size-20 md:size-24 rounded-full overflow-hidden bg-gradient-to-br from-sky-400 to-indigo-500 shrink-0">
                           {s.image ? (
@@ -223,6 +234,7 @@ export default function MapSaucesPage() {
                           )}
                         </div>
 
+                        {/* nama full, turun baris jika panjang */}
                         <div className="min-w-0 flex-1">
                           <div className="font-bold text-slate-800 text-base sm:text-lg md:text-xl whitespace-normal break-words leading-snug">
                             {s.name}
@@ -241,10 +253,7 @@ export default function MapSaucesPage() {
               onClick={save}
               disabled={saving}
               className="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold
-                         text-sm sm:text-base md:text-lg
-                         px-6 sm:px-5 md:px-10
-                         py-3 sm:py-3 md:py-4
-                         hover:bg-slate-800 transition shadow"
+                         text-sm sm:text-base md:text-lg px-6 sm:px-5 md:px-10 py-3 sm:py-3 md:py-4 shadow disabled:opacity-50"
             >
               {saving ? "Menyimpan…" : "Lanjutkan"}
             </button>
@@ -252,10 +261,7 @@ export default function MapSaucesPage() {
               <button
                 onClick={() => router.back()}
                 className="inline-flex items-center gap-2 rounded-full bg-slate-700 text-white
-                         text-sm sm:text-base md:text-lg
-                         px-4 sm:px-5 md:px-6
-                         py-2.5 sm:py-3 md:py-3.5
-                         hover:bg-slate-800 transition shadow"
+                           text-sm sm:text-base md:text-lg px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 md:py-3.5 shadow hover:bg-slate-800"
               >
                 ← Kembali
               </button>
