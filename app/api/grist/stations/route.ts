@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       .filter((s) => s.fields.BranchCode === branch.id)
       .map((s) => ({
         stationCode: s.fields.StationCode,
-        displayName: s.fields.DisplayName || s.fields.StationCode,
+        stationName: s.fields.StationName || s.fields.StationCode,
         branchCode,
       }));
 

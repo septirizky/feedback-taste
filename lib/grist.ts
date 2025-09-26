@@ -93,8 +93,42 @@ export async function gristCreate<T extends object>(
   return rec;
 }
 
-export interface BranchFields {
-  BranchCode: string;
-  BranchName?: string;
-  BranchStatus?: string;
+export async function gristCreateMany<T extends object>(
+  table: string,
+  rows: T[]
+): Promise<void> {
+  if (!rows.length) return;
+  const url = gristUrl(table, "records");
+  const body = JSON.stringify({
+    records: rows.map((fields) => ({ fields })),
+  });
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${KEY}`,
+      "Content-Type": "application/json",
+    },
+    body,
+    cache: "no-store",
+  });
+  await assertOk(res, url);
+}
+
+export async function gristUpdateMany<T extends object>(
+  table: string,
+  rows: Array<{ id: RowId; fields: Partial<T> }>
+): Promise<void> {
+  if (!rows.length) return;
+  const url = gristUrl(table, "records");
+  const body = JSON.stringify({ records: rows });
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${KEY}`,
+      "Content-Type": "application/json",
+    },
+    body,
+    cache: "no-store",
+  });
+  await assertOk(res, url);
 }

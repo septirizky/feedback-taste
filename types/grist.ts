@@ -8,7 +8,7 @@ export interface BranchFields {
 
 export interface StationFields {
   StationCode: string;
-  DisplayName?: string;
+  StationName: string;
   BranchCode: RowId;
   StationStatus?: string;
 }
@@ -16,15 +16,17 @@ export interface StationFields {
 export interface SauceFields {
   SauceID?: string;
   SauceName: string;
-  Description?: string;
-  Image?: string;
+  SauceDescription?: string;
+  SauceImage?: string;
+  SauceStatus?: string;
 }
 
 export interface StationSauceFields {
   StationSauceID?: string;
   BranchCode: RowId;
   StationCode: RowId;
-  SauceName: RowId;
+  SauceID: RowId;
+  SauceName?: string;
   SauceDescription?: string;
   SauceImage?: string;
 }

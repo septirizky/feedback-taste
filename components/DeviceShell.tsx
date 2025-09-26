@@ -2,7 +2,6 @@
 import { ReactNode, useEffect } from "react";
 
 export default function DeviceShell({ children }: { children: ReactNode }) {
-  // Kiosk feel: kunci viewport, non-scroll horizontal
   useEffect(() => {
     document.documentElement.style.height = "100%";
     document.body.style.height = "100%";

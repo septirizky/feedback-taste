@@ -56,3 +56,37 @@
     animation: none !important;
   }
 }
+
+/* ====== Emoji Burst (global) ====== */
+@keyframes emoji-burst-float {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx, 0), var(--dy, -140px), 0) scale(1)
+      rotate(var(--rot, 25deg));
+  }
+}
+
+.burst-emoji {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  font-size: var(--size, 26px);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: emoji-burst-float var(--dur, 1.5s) cubic-bezier(0.16, 0.67, 0.4, 1)
+    var(--delay, 0s) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst-emoji {
+    animation: none !important;
+  }
+}

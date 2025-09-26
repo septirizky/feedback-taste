@@ -29,7 +29,7 @@ export default function StationSaucesPage() {
         if (!r.ok) throw new Error(await r.text());
         return r.json();
       })
-      .then((d) => setItems(d.items ?? []))
+      .then((d) => setItems((d.items ?? []).slice(0, 4))) // tetap batasi 4
       .catch((e) => {
         console.error(e);
         alert("Gagal memuat saus. Cek server log.");
@@ -37,39 +37,38 @@ export default function StationSaucesPage() {
       .finally(() => setLoading(false));
   }, [stationCode]);
 
-  const visible = items.slice(0, 4);
-
   return (
     <DeviceShell>
-      <div className="relative h-full overflow-hidden bg-gradient-to-b from-slate-50 via-white to-orange-50">
+      <div className="relative h-full overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-orange-50">
+        {/* dekor pojok */}
         <img
           src="/kerang.png"
           alt=""
-          className="pointer-events-none select-none absolute top-2 left-2  w-24 md:w-28 opacity-90 deco-shake deco-slow deco-delay-150"
+          className="pointer-events-none select-none absolute top-2 left-2  w-16 sm:w-20 md:w-24 lg:w-28 opacity-90 deco-shake deco-slow deco-delay-150"
         />
         <img
           src="/udang.png"
           alt=""
-          className="pointer-events-none select-none absolute top-2 right-2 w-24 md:w-28 opacity-90 deco-shake deco-fast deco-delay-300"
+          className="pointer-events-none select-none absolute top-2 right-2 w-16 sm:w-20 md:w-24 lg:w-28 opacity-90 deco-shake deco-fast deco-delay-300"
         />
         <img
           src="/kepiting.png"
           alt=""
-          className="pointer-events-none select-none absolute bottom-2 left-2 w-24 md:w-28 opacity-90 deco-shake deco-slow deco-delay-450"
+          className="pointer-events-none select-none absolute bottom-2 left-2 w-16 sm:w-20 md:w-24 lg:w-28 opacity-90 deco-shake deco-slow deco-delay-450"
         />
         <img
           src="/cumi.png"
           alt=""
-          className="pointer-events-none select-none absolute bottom-2 right-2 w-24 md:w-28 opacity-90 deco-shake deco-fast deco-delay-600"
+          className="pointer-events-none select-none absolute bottom-2 right-2 w-16 sm:w-20 md:w-24 lg:w-28 opacity-90 deco-shake deco-fast deco-delay-600"
         />
 
         {/* konten */}
         <div className="mx-auto max-w-7xl h-full flex flex-col">
-          <div className="px-6 pt-22 pb-4 text-center">
-            <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800">
+          <div className="px-4 sm:px-6 pt-16 md:pt-22 pb-4 text-center">
+            <h1 className="font-extrabold text-slate-800 text-2xl sm:text-3xl md:text-5xl">
               Pilih Saus yang Anda Coba
             </h1>
-            <p className="mt-3 text-slate-600 text-base md:text-lg">
+            <p className="mt-2 sm:mt-3 text-slate-600 text-sm sm:text-base md:text-lg">
               Klik pada saus yang baru saja Anda rasakan
             </p>
           </div>
@@ -78,15 +77,16 @@ export default function StationSaucesPage() {
             <div className="px-6 text-center text-slate-500">Memuat…</div>
           )}
 
-          <div className="px-6 flex-1 grid place-items-center">
+          <div className="px-4 sm:px-6 flex-1">
+            {/* Grid rapi & auto-center untuk 1–3 item, responsif untuk 4+ */}
             <div
               className="
-                w-full grid gap-6 md:gap-8
-                grid-cols-1 sm:grid-cols-2 xl:grid-cols-4
-                justify-items-stretch
+                grid gap-4 sm:gap-6 md:gap-8
+                max-w-6xl mx-auto             /* batasi lebar di layar besar */
+                [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]
               "
             >
-              {visible.map((s) => (
+              {items.map((s) => (
                 <button
                   key={s.code}
                   onClick={() =>
@@ -97,48 +97,72 @@ export default function StationSaucesPage() {
                     )
                   }
                   className="
-                    group rounded-3xl bg-white/90 backdrop-blur
-                    shadow-[0_10px_30px_rgba(0,0,0,.08)] ring-1 ring-black/5
-                    p-6 md:p-8 hover:-translate-y-0.5
-                    hover:shadow-[0_16px_40px_rgba(0,0,0,.10)]
-                    transition text-center
+                    w-full h-full
+                    group rounded-2xl md:rounded-3xl bg-white/90 backdrop-blur
+                    shadow-[0_8px_24px_rgba(0,0,0,.08)] md:shadow-[0_10px_30px_rgba(0,0,0,.08)]
+                    ring-1 ring-black/5 p-4 sm:p-6 md:p-8
+                    hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,.10)]
+                    transition
+                    flex flex-col items-center text-center
                   "
                 >
-                  <div className="flex flex-col items-center">
-                    <div className="relative mb-6">
-                      <div className="relative size-28 md:size-36 rounded-full overflow-hidden shadow-xl bg-gradient-to-br from-sky-400 to-indigo-500">
-                        {s.iconUrl ? (
-                          <img
-                            src={s.iconUrl}
-                            alt={s.sauceName}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            loading="lazy"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <span className="absolute inset-0 grid place-content-center text-4xl">
-                            🌶️
-                          </span>
-                        )}
-                      </div>
+                  {/* ICON */}
+                  <div className="mb-4 sm:mb-5 md:mb-6">
+                    <div className="relative rounded-full overflow-hidden shadow-xl bg-gradient-to-br from-sky-400 to-indigo-500 size-16 sm:size-20 md:size-24">
+                      {s.iconUrl ? (
+                        <img
+                          src={s.iconUrl}
+                          alt={s.sauceName}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span className="absolute inset-0 grid place-content-center text-2xl sm:text-3xl md:text-4xl">
+                          🌶️
+                        </span>
+                      )}
                     </div>
-
-                    <h2 className="text-xl md:text-2xl font-extrabold text-slate-800">
-                      {s.sauceName}
-                    </h2>
-                    <p className="mt-2 text-slate-600 text-sm md:text-base max-w-prose">
-                      {s.description}
-                    </p>
                   </div>
+
+                  {/* JUDUL – tinggi konsisten agar baris rata */}
+                  <h2
+                    className="
+                      font-extrabold text-slate-800 leading-snug
+                      text-base sm:text-lg md:text-2xl px-2
+                      min-h-[3.2rem] sm:min-h-[3.6rem] md:min-h-[4rem]
+                      grid place-items-center
+                    "
+                    title={s.sauceName}
+                  >
+                    {s.sauceName}
+                  </h2>
+
+                  {/* DESKRIPSI – tinggi konsisten */}
+                  <p
+                    className="
+                      mt-1 sm:mt-2 text-slate-600
+                      text-xs sm:text-sm md:text-base px-3 leading-snug
+                      min-h-[2.1rem] sm:min-h-[2.4rem] md:min-h-[2.7rem]
+                    "
+                    title={s.description}
+                  >
+                    {s.description}
+                  </p>
+
+                  {/* Spacer untuk meratakan tinggi konten */}
+                  <div className="mt-auto" />
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="px-6 pb-6 text-center">
+          <div className="p-6 text-center">
             <button
               onClick={() => router.back()}
-              className="inline-flex items-center gap-2 rounded-full bg-slate-700 text-white px-5 py-3 text-base hover:bg-slate-800 transition shadow"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-700 text-white
+                         text-sm sm:text-base md:text-lg px-4 sm:px-5 md:px-6
+                         py-2.5 sm:py-3 md:py-3.5 hover:bg-slate-800 transition shadow"
             >
               ← Kembali
             </button>

@@ -59,7 +59,7 @@ export default function StartPage() {
 
   return (
     <DeviceShell>
-      <div className="relative h-full text-white overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-500/70 to-sky-500">
+      <div className="relative h-full text-white overflow-y-auto bg-gradient-to-br from-indigo-600 via-indigo-500/70 to-sky-500">
         <img
           src="/kerang.png"
           alt=""
@@ -90,11 +90,11 @@ export default function StartPage() {
             loading="eager"
           />
 
-          <h1 className="text-5xl font-extrabold mb-3 drop-shadow">
+          <h1 className="font-extrabold drop-shadow text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
             {branchName || "Bandar Djakarta"}
           </h1>
 
-          <p className="text-xl max-w-2xl mx-auto opacity-95">
+          <p className="text-base sm:text-lg md:text-xl max-w-2xl mx-auto opacity-95">
             Terima kasih sudah mencoba saus kami! Silakan beri pendapat Anda
             tentang cita rasa saus yang telah Anda coba.
           </p>
@@ -103,7 +103,7 @@ export default function StartPage() {
             href={`/${encodeURIComponent(branchCode)}/${encodeURIComponent(
               stationCode
             )}/station-sauces`}
-            className="mt-12 inline-flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-12 py-5 text-2xl rounded-full shadow-lg shadow-black/10 transition"
+            className="mt-12 inline-flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-lg sm:text-xl md:text-2xl px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-full shadow-lg shadow-black/10 transition"
           >
             🚀 Mulai Feedback
           </Link>
